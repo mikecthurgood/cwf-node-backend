@@ -1,0 +1,23 @@
+{
+    "development": {
+        "username": "postgres",
+        "password": "Commenc4ly3t1!",
+        "database": "CWF",
+        "host": "localhost",
+        "dialect": "postgres"
+    },
+    "test": {
+        "username": "postgres",
+        "password": "Commenc4ly3t1!",
+        "database": "CWF",
+        "host": "localhost",
+        "dialect": "postgres"
+    },
+    "production": {
+        "username": "postgres",
+        "password": "Commenc4ly3t1!",
+        "database": "CWF",
+        "host": "localhost",
+        "dialect": "postgres"
+    }
+}
