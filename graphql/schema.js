@@ -5,10 +5,11 @@ module.exports = buildSchema(`
         id: ID!
         name: String!
         description: String!
-        weekdayOpening: Int!
-        weekdayClosing: Int!
-        weekendOpening: Int!
-        weekendClosing: Int!
+        weekdayOpening: String!
+        weekdayClosing: String!
+        weekendOpening: String!
+        weekendClosing: String!
+        openingNotes: String
         websiteUrl: String!
         imageUrl: String!
         boulderingOnly: Boolean!
@@ -51,12 +52,6 @@ module.exports = buildSchema(`
         password: String!
     }
 
-    input ReviewInputData {
-        title: String!
-        content: String!
-        rating: Int!
-    }
-
     type WallData {
         walls: [Wall!]!
         totalWalls: Int!
@@ -64,14 +59,11 @@ module.exports = buildSchema(`
 
     type RootMutation {
         createUser(userInput: UserInputData): User!
-        createReview(reviewInput: ReviewInputData): Review!
-        updatePost(id: ID!, reviewInput: ReviewInputData!): Review!
-        deletePost(id: ID!): Boolean
     }
 
     type RootQuery {
         login(email: String!, password: String!): AuthData!
-        walls(page: Int): WallData!
+        walls: WallData!
         currentUser: User!
         singleWall(wallId: ID!): Wall!
     }

@@ -17,19 +17,19 @@ const Wall = sequelize.define('wall', {
         allowNull: false
     },
     weekdayOpening: {
-        type: Sequelize.INTEGER,
+        type: Sequelize.STRING,
         allowNull: false
     },
     weekdayClosing: {
-        type: Sequelize.INTEGER,
+        type: Sequelize.STRING,
         allowNull: false
     },
     weekendOpening: {
-        type: Sequelize.INTEGER,
+        type: Sequelize.STRING,
         allowNull: false
     },
     weekendClosing: {
-        type: Sequelize.INTEGER,
+        type: Sequelize.STRING,
         allowNull: false
     },
     openingNotes: {
@@ -37,11 +37,11 @@ const Wall = sequelize.define('wall', {
         allowNull: true
     },
     websiteUrl: {
-        type: Sequelize.STRING,
+        type: Sequelize.TEXT,
         allowNull: false
     },
     imageUrl: {
-        type: Sequelize.STRING,
+        type: Sequelize.TEXT,
         allowNull: false
     },
     boulderingOnly: {

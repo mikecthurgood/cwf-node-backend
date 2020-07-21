@@ -1,22 +1,27 @@
+require('dotenv').config()
 const path = require('path');
 
 const express = require('express');
 const bodyParser = require('body-parser');
 const multer = require('multer');
-const {graphqlHTTP} = require('express-graphql');
+// const {graphqlHTTP} = require('express-graphql');
+const graphqlHttp = require('express-graphql');
+
 
 const graphqlSchema = require('./graphql/schema');
 const graphqlResolver = require('./graphql/resolvers');
-// const auth = require('./middleware/is-auth')
+const auth = require('./middleware/auth')
 
 const sequelize = require('./db/cwfDb');
 const Wall = require('./models/wall');
 const User = require('./models/user');
 // const Review = require('./models/oldReviewClass');
 const Review = require('./models/review');
-
+const port = process.env.PORT;
 const app = express();
 var cors = require('cors')
+
+const {seedWalls} = require('./seeds')
 
 
 const fileStorage = multer.diskStorage({
@@ -51,36 +56,33 @@ app.use('/images', express.static(path.join(__dirname, 'images')));
 
 app.use((req, res, next) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader(
-    'Access-Control-Allow-Methods',
-    'OPTIONS, GET, POST, PUT, PATCH, DELETE'
-  );
+  res.setHeader('Access-Control-Allow-Methods', 'OPTIONS, GET, POST, PUT, PATCH, DELETE');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
   next();
 });
 
-// app.use(auth)
+app.use(auth)
 
-app.put('/post-image', (req, res, next) => {
-  if (!req.isAuth) {
-    throw new Error('Not authenticated')
-  }
-  if (!req.file) {
-    return res.status(200).json({ message: 'No file provided'})
-  }
- const newImageUrl =  req.file.path.replace('\\', '/');
- return res
-   .status(201)
-   .json({ message: 'File stored.', filePath: newImageUrl });
-});
+// app.put('/post-image', (req, res, next) => {
+//   if (!req.isAuth) {
+//     throw new Error('Not authenticated')
+//   }
+//   if (!req.file) {
+//     return res.status(200).json({ message: 'No file provided'})
+//   }
+//  const newImageUrl =  req.file.path.replace('\\', '/');
+//  return res
+//    .status(201)
+//    .json({ message: 'File stored.', filePath: newImageUrl });
+// });
 
 app.use(
   '/graphql',
-  graphqlHTTP({
+  graphqlHttp({
     schema: graphqlSchema,
     rootValue: graphqlResolver,
     graphiql: true,
-    formatError(err) {
+    customFormatErrorFn(err) {
       if (!err.originalError) {
         return err
       }
@@ -91,6 +93,19 @@ app.use(
     }
   })
 )
+
+app.get('/seed-walls', async (req, res, next) => {
+  try {
+    const result = await seedWalls()
+  return res
+    .status(200)
+    .json({ message: 'DB Seeded.,', result });
+  }
+  catch (err) {
+      console.log(err)
+  }
+  
+})
 
 app.use((error, req, res, next) => {
   console.log(error);
@@ -105,10 +120,10 @@ app.use((error, req, res, next) => {
 
 try {
     sequelize
-    // .sync()
-    .sync({ force: true })
+    .sync()
+    // .sync({ force: true })
     .then(result => {
-      app.listen(8080, () => console.log('listening on port 8080...'));
+      app.listen(port, () => console.log(`listening on port ${port}...`));
     })
     
 }
