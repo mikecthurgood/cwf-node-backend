@@ -72,6 +72,10 @@ const Wall = sequelize.define('wall', {
         type: Sequelize.STRING,
         allowNull: false
     },
+    slug: {
+        type: Sequelize.STRING,
+        allowNull: false
+    }
 })
 
 module.exports = Wall

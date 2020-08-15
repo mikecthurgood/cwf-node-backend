@@ -6,12 +6,14 @@ const jwt = require('jsonwebtoken')
 const Wall = require('../models/wall')
 const Review = require('../models/review')
 const {clearImage} = require('../util/file')
+const sequelize = require('../db/cwfDb')
+const { QueryTypes } = require('sequelize')
 
 const key = process.env.TOKENKEY;
 
 
 const findWall = async wallId => {
-    const wall = await Wall.findByPk(postId)
+    const wall = await Wall.findByPk(wallId)
         if (!wall) {
             new Error('wall not found')
             error.code = 404
@@ -19,6 +21,23 @@ const findWall = async wallId => {
         }
     return wall
 }
+
+const findWallBySlug = async slug => {
+    const wall = await sequelize.query(
+        `SELECT * FROM walls WHERE slug = :slug`,
+            {
+                replacements: { slug: slug },
+                type: QueryTypes.SELECT
+            }
+    )
+        if (!wall) {
+            new Error('wall not found')
+            error.code = 404
+            throw error
+        }
+    return wall[0]
+}
+
 
 const findUser = async (req) => {
     const user = await User.findByPk(req.userId);
@@ -41,7 +60,6 @@ const authUser = ({isAuth}) => {
         throw error
     }
 }
-
 module.exports = {
     createUser: async ({ userInput }, req) => {
         try {
@@ -66,7 +84,7 @@ module.exports = {
             if (errors.length > 0) {
                 const error = new Error('Invalid input')
                 error.data = errors
-                error.code = 422
+                error.code = 456
                 throw error
             }
 
@@ -85,10 +103,117 @@ module.exports = {
         }
     },
 
-    walls: async (req) => {
-        const walls = await Wall.findAll()
-        const wallCount = await Wall.findAndCountAll({ distinct : true })
-        return {walls, totalWalls: wallCount.count}
+    createReview: async ({ userInput }, req) => {
+        authUser(req)
+        const {title, content, rating, wallId} = userInput
+        let errors = []
+        try {
+            const user = await User.findByPk(req.userId)
+            const wall = await Wall.findByPk(wallId)
+
+            if (!user) {
+                const error = new Error('Not logged in')
+                error.code = 401
+                throw error
+            }
+            if (!wall) {
+                const error = new Error('Wall not found')
+                error.code = 404
+                throw error
+            }
+            if (
+                validator.isEmpty(title) || 
+                !validator.isLength(title, { min: 5 })
+            ) {
+                errors.push({message: 'Title too short'})
+            }
+            if (validator.isEmpty(rating.toString())) {
+                errors.push({message: 'Please include a rating with your review'})
+            }
+            if (rating < 1 || rating > 5) {
+                errors.push({message: 'Rating must be between 1 and 5 stars'})
+            }
+            if (errors.length > 0) {
+                const error = new Error('Invalid input')
+                error.data = errors
+                error.code = 400
+                throw error
+            }
+            const review = await Review.create({title, content, rating, wallId, authorName: user.name, authorId: user.id})
+            return { ...review.dataValues }
+        }
+        catch(err) {
+            console.log(err)
+            err.statusCode = 500
+            return err
+        }
+    },
+
+    updateReview: async ({id, userInput }, req) => {
+        authUser(req)
+        const {title, content, rating, wallId} = userInput
+        let errors = []
+        try {
+            const user = await User.findByPk(req.userId)
+            const wall = await Wall.findByPk(wallId)
+            const oldReview = await Review.findByPk(id)
+
+            if (!user) {
+                const error = new Error('Not logged in')
+                error.code = 401
+                throw error
+            }
+            if (!wall) {
+                const error = new Error('Wall not found')
+                error.code = 404
+                throw error
+            }
+            if (
+                validator.isEmpty(title) || 
+                !validator.isLength(title, { min: 5 })
+            ) {
+                errors.push({message: 'Title too short'})
+            }
+            if (validator.isEmpty(rating.toString())) {
+                errors.push({message: 'Please include a rating with your review'})
+            }
+            if (rating < 1 || rating > 5) {
+                errors.push({message: 'Rating must be between 1 and 5 stars'})
+            }
+            if (errors.length > 0) {
+                const error = new Error('Invalid input')
+                error.data = errors
+                error.code = 400
+                throw error
+            }
+            const review = await oldReview.update({title, content, rating, wallId, authorName: user.name, authorId: user.id})
+            console.log(review)
+            return { ...review.dataValues }
+        }
+        catch(err) {
+            console.log(err)
+            err.statusCode = 500
+            return err
+        }
+    },
+
+    deleteReview: async ({id}, req) => {
+        try {
+            authUser(req)
+            const review = await Review.findByPk(id)
+            console.log(review.dataValues)
+            console.log(req.userId)
+
+            if (Number(review.authorId) !== Number(req.userId)) throw new Error('Unauthorised')
+            let result = false
+            const deletedReview = await review.destroy()
+            if (deletedReview) result = true
+            return result
+        }
+        catch(err) {
+            console.log(err)
+            return err
+        }
     },
 
     login: async ({ email, password }) => {
@@ -113,9 +238,9 @@ module.exports = {
                     email: user.email,
                 }, 
                 key,
-                { expiresIn: '1h'}
+                // { expiresIn: '1h'}
             )
-            return {token, userId: user.id.toString()}
+            return {token, userId: user.id.toString(), username: user.name}
         }
         catch(err) {
             return err
@@ -123,5 +248,34 @@ module.exports = {
 
     },
 
-   
+    singleWall: async ({wallId}, req) => {
+        try {
+            try {
+                authUser(req)
+            } catch(err) {
+                console.log(err)
+            }
+            const singleWall = await findWallBySlug(wallId)
+            const reviews = await Review.findAll({where: {wallId: singleWall.id}})
+            const wall = {...singleWall, reviews: reviews.map(review => review.dataValues)}
+            return {wall, loggedIn: req.isAuth }
+        } catch (err) {
+            console.log(err)
+        }
+    },
+
+    walls: async ({}, req) => {
+        try {
+            try {
+                authUser(req)
+            } catch(err) {
+                console.log(err)
+            }
+            const walls = await Wall.findAll({include: Review})
+            const wallCount = await Wall.findAndCountAll({ distinct : true })
+            return { walls, totalWalls: wallCount.count, userId: req.userId, loggedIn: req.isAuth }
+        } catch (err) {
+            console.log(err)
+        }
+    },
 }

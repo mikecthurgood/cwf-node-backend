@@ -19,17 +19,19 @@ module.exports = buildSchema(`
         city: String!
         region: String!
         postcode: String!
+        reviews: [Review]
+        slug: String!
     }
 
     type Review {
         id: ID!
         title: String!
-        content: String!
+        content: String
         rating: Int!
         authorName: String!
-        userId: String!
+        authorId: String!
+        wallId: String!
         createdAt: String!
-        updatedAt: String!
     }
 
     type User {
@@ -44,28 +46,45 @@ module.exports = buildSchema(`
     type AuthData {
         token: String!
         userId: String!
+        username: String!
     }
-
+    
+    input ReviewInputData {
+        title: String!
+        content: String!
+        rating: Int!
+        wallId: String!
+    }
+    
     input UserInputData {
         email: String!
         name: String!
         password: String!
     }
+    
+    type SingleWallData {
+        wall: Wall!
+        loggedIn: Boolean
+    }
 
     type WallData {
         walls: [Wall!]!
         totalWalls: Int!
+        loggedIn: Boolean
     }
 
     type RootMutation {
         createUser(userInput: UserInputData): User!
+        createReview(userInput: ReviewInputData): Review!
+        updateReview(id: ID!, userInput: ReviewInputData!): Review!
+        deleteReview(id: ID!): Boolean
     }
 
     type RootQuery {
         login(email: String!, password: String!): AuthData!
         walls: WallData!
         currentUser: User!
-        singleWall(wallId: ID!): Wall!
+        singleWall(wallId: String!): SingleWallData!
     }
 
     schema {

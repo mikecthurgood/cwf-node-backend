@@ -107,16 +107,17 @@ app.get('/seed-walls', async (req, res, next) => {
   
 })
 
-app.use((error, req, res, next) => {
-  console.log(error);
-  const status = error.statusCode || 500;
-  const message = error.message;
-  const data = error.data;
+app.use((err, req, res, next) => {
+  console.log(err);
+  const status = err.statusCode || 500;
+  const message = err.message;
+  const data = err.data;
   res.status(status).json({ message: message, data: data });
 });
 
-// Post.belongsTo(User, {as: 'author', constraints: true, onDelete: 'CASCADE' })
-// User.hasMany(Post)
+Review.belongsTo(User, {as: 'author', constraints: true, onDelete: 'CASCADE' })
+Review.belongsTo(Wall)
+Wall.hasMany(Review)
 
 try {
     sequelize

@@ -16,17 +16,13 @@ const Review = sequelize.define('review', {
         type: Sequelize.INTEGER,
         allowNull: false,
         validate: {
-            min: 0,
+            min: 1,
             max: 5
         }
     },
     content: {
         type: Sequelize.TEXT,
         allowNull: true
-    },
-    userId: {
-        type: Sequelize.INTEGER,
-        allowNull: false
     },
     authorName: {
         type: Sequelize.STRING,
