@@ -4,6 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "build": "node app.js",
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "nodemon app.js"
   },
@@ -18,6 +19,7 @@
   },
   "homepage": "https://github.com/mikecthurgood/cwf-node-backend#readme",
   "dependencies": {
+    "axios": "^0.19.2",
     "bcryptjs": "^2.4.3",
     "body-parser": "^1.18.3",
     "chai": "^4.2.0",

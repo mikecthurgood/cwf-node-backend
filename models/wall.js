@@ -72,10 +72,38 @@ const Wall = sequelize.define('wall', {
         type: Sequelize.STRING,
         allowNull: false
     },
+    phone: {
+        type: Sequelize.STRING,
+        allowNull: false
+    },
+    email: {
+        type: Sequelize.STRING,
+        allowNull: false
+    },
     slug: {
         type: Sequelize.STRING,
         allowNull: false
-    }
+    },
+    auto: {
+        type: Sequelize.BOOLEAN,
+        allowNull: false
+    },
+    top: {
+        type: Sequelize.BOOLEAN,
+        allowNull: false
+    },
+    lead: {
+        type: Sequelize.BOOLEAN,
+        allowNull: false
+    },
+    gym: {
+        type: Sequelize.BOOLEAN,
+        allowNull: false
+    },
+    cafe: {
+        type: Sequelize.BOOLEAN,
+        allowNull: false
+    },
 })
 
 module.exports = Wall

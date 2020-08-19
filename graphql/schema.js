@@ -19,8 +19,16 @@ module.exports = buildSchema(`
         city: String!
         region: String!
         postcode: String!
+        email: String!
+        phone: String!
+        auto: Boolean!
+        top: Boolean!
+        lead: Boolean!
+        gym: Boolean!
+        cafe: Boolean!
         reviews: [Review]
         slug: String!
+        distance: String
     }
 
     type Review {
@@ -83,6 +91,7 @@ module.exports = buildSchema(`
     type RootQuery {
         login(email: String!, password: String!): AuthData!
         walls: WallData!
+        wallsWithDistance(postcode: String!): WallData!
         currentUser: User!
         singleWall(wallId: String!): SingleWallData!
     }

@@ -8,6 +8,7 @@ const Review = require('../models/review')
 const {clearImage} = require('../util/file')
 const sequelize = require('../db/cwfDb')
 const { QueryTypes } = require('sequelize')
+const axios = require('axios')
 
 const key = process.env.TOKENKEY;
 
@@ -266,11 +267,7 @@ module.exports = {
 
     walls: async ({}, req) => {
         try {
-            try {
-                authUser(req)
-            } catch(err) {
-                console.log(err)
-            }
+            
             const walls = await Wall.findAll({include: Review})
             const wallCount = await Wall.findAndCountAll({ distinct : true })
             return { walls, totalWalls: wallCount.count, userId: req.userId, loggedIn: req.isAuth }
@@ -278,4 +275,29 @@ module.exports = {
             console.log(err)
         }
     },
+
+    wallsWithDistance: async ({postcode}, req) => {
+        try{
+            try {
+                authUser(req)
+            } catch(err) {
+                console.log(err)
+            }
+            const walls = await Wall.findAll({include: Review})
+            const wallCount = await Wall.findAndCountAll({ distinct : true })
+            const originPostcode = postcode.replace(/\s/g,'')
+            const wallPostcodes = walls.map(wall => wall.postcode.replace(/\s/g,'')).join('|')
+            const distanceApiUrl = `https://maps.googleapis.com/maps/api/distancematrix/json?mode=walking&units=imperial&origins=${originPostcode}&destinations=${wallPostcodes}&key=${process.env.MAPSAPIKEY}`
+            const result = await axios.get(distanceApiUrl)
+            const distances = result.data.rows[0].elements
+            const wallsWithDistances = walls.map(wall => {
+                const distance = distances.shift()
+                return {...wall.dataValues, distance: distance.distance.text.split(' ')[0]}
+            })
+            return { walls: wallsWithDistances, totalWalls: wallCount.count, userId: req.userId, loggedIn: req.isAuth }
+        }
+        catch (err) {
+            console.log(err)
+        }
+    }
 }
