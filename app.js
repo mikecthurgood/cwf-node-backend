@@ -111,7 +111,7 @@ app.get('/test-url', async (req, res, next) => {
   try {
     return res
     .status(200)
-    .json({ message: 'DB Seeded.,', result });
+    .json({ message: 'test worked' });
   }
   catch (err) {
       console.log(err)
