@@ -124,7 +124,7 @@ try {
     .sync()
     // .sync({ force: true })
     .then(result => {
-      app.listen(port, () => console.log(`listening on port ${port}...`));
+      app.listen(port || 4000, () => console.log(`listening on port ${port}...`));
     })
     
 }
