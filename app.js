@@ -107,6 +107,18 @@ app.get('/seed-walls', async (req, res, next) => {
   
 })
 
+app.get('/test-url', async (req, res, next) => {
+  try {
+    return res
+    .status(200)
+    .json({ message: 'DB Seeded.,', result });
+  }
+  catch (err) {
+      console.log(err)
+  }
+  
+})
+
 app.use((err, req, res, next) => {
   console.log(err);
   const status = err.statusCode || 500;
