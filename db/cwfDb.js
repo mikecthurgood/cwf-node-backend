@@ -16,7 +16,8 @@ else  {
         protocol: 'postgres',
         dialectOptions: {
             ssl: true
-        }
+        },
+        storage: "./session.sqlite"
     })
 }
 
