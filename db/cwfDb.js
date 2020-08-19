@@ -11,7 +11,7 @@ if (process.env.NODE_ENV === 'development') {
     })
 }
 else  {
-    const sequelize = new Sequelize(process.env.DATABASE_URL)
+    sequelize = new Sequelize(process.env.DATABASE_URL)
 }
 
 
