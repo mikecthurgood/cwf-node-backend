@@ -292,7 +292,7 @@ module.exports = {
             const distances = result.data.rows[0].elements
             const wallsWithDistances = walls.map(wall => {
                 const distance = distances.shift()
-                return {...wall.dataValues, distance: distance.distance.text.split(' ')[0]}
+                return {...wall.dataValues, distance: distance.distance ? distance.distance.text.split(' ')[0] : 'Unknown'}
             })
             return { walls: wallsWithDistances, totalWalls: wallCount.count, userId: req.userId, loggedIn: req.isAuth }
         }
