@@ -65,32 +65,46 @@ module.exports = {
     createUser: async ({ userInput }, req) => {
         try {
             const {email, password, name} = userInput
+            const emailLower = email.toLowerCase()
             const errors = []
-            const existingUser = await User.findOne({where: {email}})
-            if (existingUser) {
-                const error = new Error('User already exists')
-                error.data = errors
-                error.code = 422
-                throw error
+            const errorCodes = []
+            const existingUserEmail = await User.findOne({where: {email: emailLower}})
+            if (existingUserEmail) {
+                // const error = new Error('User already exists')
+                // error.data = errors
+                // error.code = 422
+                // throw error
+                errorCodes.push(422)
+            }
+            const existingUsername = await User.findOne({where: {name}})
+            if (existingUsername) {
+                // const error = new Error('Username taken')
+                // error.data = errors
+                // error.code = 423
+                // throw error
+                errorCodes.push(423)
             }
             if (!validator.isEmail(email)) {
                 errors.push({ message: 'Email is invalid.'})
+                errorCodes.push(424)
             }
             if (
                 validator.isEmpty(password) || 
                 !validator.isLength(password, { min: 5 })
             ) {
                 errors.push({message: 'Password too short'})
+                errorCodes.push(425)
+
             }
-            if (errors.length > 0) {
-                const error = new Error('Invalid input')
-                error.data = errors
+            if (errorCodes.length > 0) {
+                const error = new Error('Errors exist')
+                error.data = errorCodes
                 error.code = 456
                 throw error
             }
 
             const hashedPw = await bcrypt.hash(password, 12)
-            return User.create({name, email, password: hashedPw})
+            return User.create({name, email: emailLower, password: hashedPw})
             .then(user => {
                 return {
                     ...user.dataValues
@@ -218,9 +232,10 @@ module.exports = {
     },
 
     login: async ({ email, password }) => {
+        const emailLower = email.toLowerCase()
         try {
 
-            const user = await User.findOne({where: {email}})
+            const user = await User.findOne({where: {email: emailLower}})
             if (!user) {
                 const error = new Error('No user found with that username or password.')
                 error.code = 401
