@@ -21,7 +21,7 @@
   },
   "homepage": "https://github.com/mikecthurgood/cwf-node-backend#readme",
   "dependencies": {
-    "axios": "^0.19.2",
+    "axios": ">=0.21.1",
     "bcryptjs": "^2.4.3",
     "body-parser": "^1.18.3",
     "chai": "^4.2.0",
@@ -37,7 +37,6 @@
     "pg": "^8.0.3",
     "sequelize": "^5.21.6",
     "sinon": "^9.0.2",
-    "socket.io": "^2.3.0",
     "validator": "^13.0.0"
   },
   "devDependencies": {}
