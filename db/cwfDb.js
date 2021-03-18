@@ -9,8 +9,7 @@ if (process.env.NODE_ENV === 'development') {
         port: 5432,
         storage: "./session.sqlite"
     })
-}
-else  {
+} else  {
     sequelize = new Sequelize(process.env.DATABASE_URL, {
         dialect: 'postgres',
         protocol: 'postgres',
@@ -23,6 +22,5 @@ else  {
         storage: "./session.sqlite"
     })
 }
-
 
 module.exports = sequelize
