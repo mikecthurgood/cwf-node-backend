@@ -5,23 +5,12 @@ const validator = require('validator')
 const jwt = require('jsonwebtoken')
 const Wall = require('../models/wall')
 const Review = require('../models/review')
-const {clearImage} = require('../util/file')
 const sequelize = require('../db/cwfDb')
 const { QueryTypes } = require('sequelize')
 const axios = require('axios')
 
 const key = process.env.TOKENKEY;
 
-
-const findWall = async wallId => {
-    const wall = await Wall.findByPk(wallId)
-        if (!wall) {
-            new Error('wall not found')
-            error.code = 404
-            throw error
-        }
-    return wall
-}
 
 const findWallBySlug = async slug => {
     const wall = await sequelize.query(
@@ -39,21 +28,6 @@ const findWallBySlug = async slug => {
     return wall[0]
 }
 
-
-const findUser = async (req) => {
-    const user = await User.findByPk(req.userId);
-    if (!user) {
-        const error = new Error('Invalid user')
-        error.data = errors
-        error.code = 401
-        throw error
-    }
-    if (user.isAdmin) {
-        req.isAdmin = true
-    }
-    return (user)
-}
-
 const authUser = ({isAuth}) => {
     if (!isAuth) {
         const error = new Error('Not authenticated')
@@ -61,6 +35,7 @@ const authUser = ({isAuth}) => {
         throw error
     }
 }
+
 module.exports = {
     createUser: async ({ userInput }, req) => {
         try {
@@ -70,18 +45,10 @@ module.exports = {
             const errorCodes = []
             const existingUserEmail = await User.findOne({where: {email: emailLower}})
             if (existingUserEmail) {
-                // const error = new Error('User already exists')
-                // error.data = errors
-                // error.code = 422
-                // throw error
                 errorCodes.push(422)
             }
             const existingUsername = await User.findOne({where: {name}})
             if (existingUsername) {
-                // const error = new Error('Username taken')
-                // error.data = errors
-                // error.code = 423
-                // throw error
                 errorCodes.push(423)
             }
             if (!validator.isEmail(email)) {
@@ -254,7 +221,6 @@ module.exports = {
                     email: user.email,
                 }, 
                 key,
-                // { expiresIn: '1h'}
             )
             return {token, userId: user.id.toString(), username: user.name}
         }
